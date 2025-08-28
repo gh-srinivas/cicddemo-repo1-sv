@@ -4,8 +4,9 @@
 name: Java CI with Gradle
 
 on:
-  push:
-    branches: [ main ]
+#  push:
+  workflow_dispatch:
+#    branches: [ main ]
   pull_request:
     branches: [ main ]
 
