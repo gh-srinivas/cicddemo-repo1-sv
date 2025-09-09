@@ -1,0 +1,447 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics Dashboard - Creative Flask Web App{% endblock %}
+
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<section class="py-5 bg-gradient-primary text-white">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <h1 class="display-5 fw-bold mb-3">Analytics Dashboard</h1>
+                <p class="lead">
+                    Real-time insights and data visualization for informed decision making.
+                </p>
+            </div>
+            <div class="col-lg-4 text-end">
+                <button class="btn btn-light" onclick="refreshDashboard()">
+                    <i class="fas fa-sync-alt me-2"></i>Refresh Data
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Key Metrics -->
+<section class="py-5">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <div class="metric-icon bg-primary text-white rounded-circle mx-auto mb-3">
+                            <i class="fas fa-eye"></i>
+                        </div>
+                        <h3 class="metric-number text-primary fw-bold">{{ analytics.total_page_views | int }}</h3>
+                        <p class="text-muted mb-2">Total Page Views</p>
+                        <small class="text-success">
+                            <i class="fas fa-arrow-up me-1"></i>+{{ analytics.growth_rate }}% this week
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <div class="metric-icon bg-success text-white rounded-circle mx-auto mb-3">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h3 class="metric-number text-success fw-bold">{{ analytics.total_unique_visitors | int }}</h3>
+                        <p class="text-muted mb-2">Unique Visitors</p>
+                        <small class="text-info">
+                            <i class="fas fa-info-circle me-1"></i>Last 30 days
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <div class="metric-icon bg-info text-white rounded-circle mx-auto mb-3">
+                            <i class="fas fa-code"></i>
+                        </div>
+                        <h3 class="metric-number text-info fw-bold">{{ analytics.total_api_calls | int }}</h3>
+                        <p class="text-muted mb-2">API Calls</p>
+                        <small class="text-primary">
+                            <i class="fas fa-bolt me-1"></i>{{ (analytics.total_api_calls / 30) | round | int }}/day avg
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <div class="metric-icon bg-warning text-white rounded-circle mx-auto mb-3">
+                            <i class="fas fa-database"></i>
+                        </div>
+                        <h3 class="metric-number text-warning fw-bold">{{ analytics.total_data_processed | int }}</h3>
+                        <p class="text-muted mb-2">Data Processed</p>
+                        <small class="text-muted">
+                            <i class="fas fa-clock me-1"></i>{{ analytics.uptime_days }} days uptime
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Charts Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row g-4">
+            <!-- Line Chart -->
+            <div class="col-lg-8">
+                <div class="card border-0 shadow">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-line me-2 text-primary"></i>
+                            Daily Activity Trends
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="activityChart" height="100"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Pie Chart -->
+            <div class="col-lg-4">
+                <div class="card border-0 shadow h-100">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-pie me-2 text-success"></i>
+                            Traffic Sources
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="trafficChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Detailed Analytics -->
+<section class="py-5">
+    <div class="container">
+        <div class="row g-4">
+            <!-- Top Metrics Table -->
+            <div class="col-lg-6">
+                <div class="card border-0 shadow">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0">
+                            <i class="fas fa-trophy me-2 text-warning"></i>
+                            Top Performing Metrics
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-borderless">
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <i class="fas fa-star text-warning me-2"></i>
+                                            Best Day Views
+                                        </td>
+                                        <td class="text-end">
+                                            <strong>{{ analytics.top_metrics.best_day_views.page_views }}</strong>
+                                            <br>
+                                            <small class="text-muted">{{ analytics.top_metrics.best_day_views.date }}</small>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <i class="fas fa-user-friends text-info me-2"></i>
+                                            Average Daily Visitors
+                                        </td>
+                                        <td class="text-end">
+                                            <strong>{{ analytics.top_metrics.average_daily_visitors | int }}</strong>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <i class="fas fa-rocket text-primary me-2"></i>
+                                            Peak API Usage
+                                        </td>
+                                        <td class="text-end">
+                                            <strong>{{ analytics.top_metrics.peak_api_usage }}</strong>
+                                            <br>
+                                            <small class="text-muted">calls/day</small>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <i class="fas fa-chart-bar text-success me-2"></i>
+                                            Growth Rate
+                                        </td>
+                                        <td class="text-end">
+                                            <strong class="text-success">+{{ analytics.growth_rate }}%</strong>
+                                            <br>
+                                            <small class="text-muted">this week</small>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- System Health -->
+            <div class="col-lg-6">
+                <div class="card border-0 shadow">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0">
+                            <i class="fas fa-heartbeat me-2 text-danger"></i>
+                            System Health Status
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span>Overall Health Score</span>
+                                <span class="fw-bold text-success">95%</span>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar bg-success" style="width: 95%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <div class="p-3 border rounded">
+                                    <i class="fas fa-server fa-2x text-success mb-2"></i>
+                                    <h6>Server Status</h6>
+                                    <span class="badge bg-success">Online</span>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="p-3 border rounded">
+                                    <i class="fas fa-database fa-2x text-success mb-2"></i>
+                                    <h6>Database</h6>
+                                    <span class="badge bg-success">Connected</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-3 text-center">
+                            <small class="text-muted">
+                                Last updated: <span id="lastUpdated">Just now</span>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Recent Activity -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="card border-0 shadow">
+            <div class="card-header bg-white py-3">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h5 class="mb-0">
+                            <i class="fas fa-history me-2 text-info"></i>
+                            Recent Activity Timeline
+                        </h5>
+                    </div>
+                    <div class="col-auto">
+                        <button class="btn btn-outline-primary btn-sm" onclick="exportData()">
+                            <i class="fas fa-download me-2"></i>Export Data
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    {% for metric in analytics.daily_metrics[-5:] %}
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-primary"></div>
+                        <div class="timeline-content">
+                            <h6 class="mb-1">{{ metric.date.strftime('%B %d, %Y') }}</h6>
+                            <p class="mb-2 text-muted">
+                                <strong>{{ metric.page_views }}</strong> page views, 
+                                <strong>{{ metric.unique_visitors }}</strong> unique visitors, 
+                                <strong>{{ metric.api_calls }}</strong> API calls
+                            </p>
+                            <div class="progress mb-2" style="height: 5px;">
+                                <div class="progress-bar" style="width: {{ (metric.page_views / 1000 * 100) | round }}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Charts data from backend
+const chartData = {{ chart_data | safe }};
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Activity Line Chart
+    const activityCtx = document.getElementById('activityChart').getContext('2d');
+    new Chart(activityCtx, {
+        type: 'line',
+        data: {
+            labels: {{ analytics.daily_metrics[-30:] | map(attribute='date') | map('string') | list | tojson }},
+            datasets: [{
+                label: 'Page Views',
+                data: {{ analytics.daily_metrics[-30:] | map(attribute='page_views') | list }},
+                borderColor: 'rgb(54, 162, 235)',
+                backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                tension: 0.1,
+                fill: true
+            }, {
+                label: 'Unique Visitors',
+                data: {{ analytics.daily_metrics[-30:] | map(attribute='unique_visitors') | list }},
+                borderColor: 'rgb(75, 192, 192)',
+                backgroundColor: 'rgba(75, 192, 192, 0.1)',
+                tension: 0.1,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Last 30 Days Activity'
+                },
+                legend: {
+                    position: 'bottom'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    
+    // Traffic Sources Pie Chart
+    const trafficCtx = document.getElementById('trafficChart').getContext('2d');
+    new Chart(trafficCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Direct', 'Search', 'Social', 'Referral'],
+            datasets: [{
+                data: [40, 30, 20, 10],
+                backgroundColor: [
+                    'rgb(54, 162, 235)',
+                    'rgb(255, 99, 132)',
+                    'rgb(75, 192, 192)',
+                    'rgb(255, 205, 86)'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+    
+    // Animate metric numbers
+    animateMetricNumbers();
+});
+
+function animateMetricNumbers() {
+    const metricNumbers = document.querySelectorAll('.metric-number');
+    
+    metricNumbers.forEach(element => {
+        const target = parseInt(element.textContent.replace(/,/g, ''));
+        let current = 0;
+        const increment = target / 50;
+        
+        const timer = setInterval(() => {
+            current += increment;
+            if (current >= target) {
+                current = target;
+                clearInterval(timer);
+            }
+            element.textContent = Math.floor(current).toLocaleString();
+        }, 30);
+    });
+}
+
+function refreshDashboard() {
+    // Show loading state
+    const refreshBtn = document.querySelector('button[onclick="refreshDashboard()"]');
+    const originalText = refreshBtn.innerHTML;
+    refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Refreshing...';
+    refreshBtn.disabled = true;
+    
+    // Simulate API call
+    setTimeout(() => {
+        // Update last updated time
+        document.getElementById('lastUpdated').textContent = new Date().toLocaleString();
+        
+        // Reset button
+        refreshBtn.innerHTML = originalText;
+        refreshBtn.disabled = false;
+        
+        // Show success message
+        const alert = document.createElement('div');
+        alert.className = 'alert alert-success alert-dismissible fade show';
+        alert.innerHTML = `
+            Dashboard refreshed successfully!
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.querySelector('.container').insertBefore(alert, document.querySelector('.container').firstChild);
+        
+        // Auto-dismiss alert
+        setTimeout(() => {
+            alert.remove();
+        }, 3000);
+    }, 2000);
+}
+
+function exportData() {
+    // Create CSV data
+    const csvData = [
+        ['Date', 'Page Views', 'Unique Visitors', 'API Calls', 'Data Processed'],
+        ...{{ analytics.daily_metrics[-30:] | map(attribute='date') | list | tojson }}.map((date, index) => [
+            date,
+            {{ analytics.daily_metrics[-30:] | map(attribute='page_views') | list }}[index],
+            {{ analytics.daily_metrics[-30:] | map(attribute='unique_visitors') | list }}[index],
+            {{ analytics.daily_metrics[-30:] | map(attribute='api_calls') | list }}[index],
+            {{ analytics.daily_metrics[-30:] | map(attribute='data_processed') | list }}[index]
+        ])
+    ];
+    
+    // Convert to CSV string
+    const csvString = csvData.map(row => row.join(',')).join('\n');
+    
+    // Create download link
+    const blob = new Blob([csvString], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `analytics-data-${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+    
+    // Clean up
+    window.URL.revokeObjectURL(url);
+}
+</script>
+{% endblock %}

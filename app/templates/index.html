@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Creative Flask Web App{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section bg-gradient-primary text-white py-5">
+    <div class="container">
+        <div class="row align-items-center min-vh-50">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">
+                    Welcome to Our Creative Flask App
+                </h1>
+                <p class="lead mb-4">
+                    Experience a modern, responsive web application built with Flask and Bootstrap. 
+                    Featuring user management, real-time analytics, and comprehensive API endpoints.
+                </p>
+                <div class="d-flex gap-3 flex-wrap">
+                    <a href="{{ url_for('main.users') }}" class="btn btn-light btn-lg">
+                        <i class="fas fa-users me-2"></i>Explore Users
+                    </a>
+                    <a href="{{ url_for('main.analytics_dashboard') }}" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-chart-line me-2"></i>View Analytics
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <div class="hero-graphic">
+                    <i class="fas fa-rocket display-1 mb-3 text-white-50"></i>
+                    <div class="floating-elements">
+                        <i class="fas fa-code floating-icon"></i>
+                        <i class="fas fa-database floating-icon-delayed"></i>
+                        <i class="fas fa-cloud floating-icon-slow"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Statistics Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-md-3 mb-4">
+                <div class="stat-card">
+                    <div class="stat-icon bg-primary text-white rounded-circle mx-auto mb-3">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3 class="stat-number">{{ stats.total_users }}</h3>
+                    <p class="text-muted">Registered Users</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="stat-card">
+                    <div class="stat-icon bg-success text-white rounded-circle mx-auto mb-3">
+                        <i class="fas fa-user-check"></i>
+                    </div>
+                    <h3 class="stat-number">{{ stats.active_sessions }}</h3>
+                    <p class="text-muted">Active Sessions</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="stat-card">
+                    <div class="stat-icon bg-info text-white rounded-circle mx-auto mb-3">
+                        <i class="fas fa-database"></i>
+                    </div>
+                    <h3 class="stat-number">{{ stats.data_processed | int }}</h3>
+                    <p class="text-muted">Data Processed</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="stat-card">
+                    <div class="stat-icon bg-warning text-white rounded-circle mx-auto mb-3">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h3 class="stat-number">{{ stats.uptime_days }}</h3>
+                    <p class="text-muted">Days Uptime</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row mb-5">
+            <div class="col-lg-8 mx-auto text-center">
+                <h2 class="display-5 fw-bold mb-3">Powerful Features</h2>
+                <p class="lead text-muted">
+                    Our application combines modern web technologies with intuitive design 
+                    to deliver exceptional user experiences.
+                </p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            {% for feature in features %}
+            <div class="col-lg-6">
+                <div class="feature-card h-100 p-4 border rounded-3 shadow-sm">
+                    <div class="feature-icon mb-3">
+                        <i class="{{ feature.icon }} fa-2x text-primary"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">{{ feature.title }}</h4>
+                    <p class="text-muted mb-3">{{ feature.description }}</p>
+                    <div class="feature-actions">
+                        {% if feature.title == 'User Management' %}
+                            <a href="{{ url_for('main.users') }}" class="btn btn-outline-primary btn-sm">
+                                Explore Users <i class="fas fa-arrow-right ms-1"></i>
+                            </a>
+                        {% elif feature.title == 'Data Analytics' %}
+                            <a href="{{ url_for('main.analytics_dashboard') }}" class="btn btn-outline-primary btn-sm">
+                                View Dashboard <i class="fas fa-arrow-right ms-1"></i>
+                            </a>
+                        {% elif feature.title == 'API Integration' %}
+                            <a href="/api/health" target="_blank" class="btn btn-outline-primary btn-sm">
+                                Test API <i class="fas fa-external-link-alt ms-1"></i>
+                            </a>
+                        {% else %}
+                            <a href="#" class="btn btn-outline-primary btn-sm">
+                                Learn More <i class="fas fa-arrow-right ms-1"></i>
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-5 bg-primary text-white">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h3 class="fw-bold mb-2">Ready to Get Started?</h3>
+                <p class="mb-0">Explore our user management system or dive into real-time analytics.</p>
+            </div>
+            <div class="col-lg-4 text-end">
+                <a href="{{ url_for('main.users') }}" class="btn btn-light me-3">
+                    <i class="fas fa-users me-2"></i>Manage Users
+                </a>
+                <a href="/api/health" target="_blank" class="btn btn-outline-light">
+                    <i class="fas fa-code me-2"></i>API Docs
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Add some interactive effects
+document.addEventListener('DOMContentLoaded', function() {
+    // Animate statistics on scroll
+    const animateNumbers = () => {
+        const statNumbers = document.querySelectorAll('.stat-number');
+        
+        statNumbers.forEach(stat => {
+            const finalNumber = parseInt(stat.textContent);
+            let currentNumber = 0;
+            const increment = Math.ceil(finalNumber / 50);
+            
+            const timer = setInterval(() => {
+                currentNumber += increment;
+                if (currentNumber >= finalNumber) {
+                    currentNumber = finalNumber;
+                    clearInterval(timer);
+                }
+                stat.textContent = currentNumber.toLocaleString();
+            }, 30);
+        });
+    };
+    
+    // Trigger animation when statistics section is visible
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                animateNumbers();
+                observer.disconnect();
+            }
+        });
+    });
+    
+    const statsSection = document.querySelector('.py-5.bg-light');
+    if (statsSection) {
+        observer.observe(statsSection);
+    }
+    
+    // Add hover effects to feature cards
+    const featureCards = document.querySelectorAll('.feature-card');
+    featureCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-5px)';
+            this.style.transition = 'transform 0.3s ease';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+});
+</script>
+{% endblock %}

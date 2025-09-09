@@ -1,0 +1,530 @@
+# Flask Web App CI/CD Pipeline
+# 
+# This workflow provides a comprehensive CI/CD pipeline for the Flask web application
+# including code quality checks, testing, security scanning, Docker build and deployment.
+#
+# Workflow Steps:
+# 1. Checkout code from repository
+# 2. Setup Python environment and install dependencies
+# 3. Run code quality checks (linting, formatting)
+# 4. Execute comprehensive test suite with coverage analysis
+# 5. Perform SonarCloud security and quality analysis
+# 6. Send email notification if test coverage is below threshold
+# 7. Build and test Docker image
+# 8. Push Docker image to Docker Hub registry
+# 9. Deploy to staging/production environment (if applicable)
+#
+# Environment Variables Required:
+# - SONAR_TOKEN: SonarCloud authentication token
+# - DOCKER_HUB_USERNAME: Docker Hub username (dkrsrinivas)
+# - DOCKER_HUB_TOKEN: Docker Hub access token
+# - SMTP_PASSWORD: SMTP password for email notifications
+#
+# Author: Auto-generated for CICD Demo
+# Version: 1.0.0
+
+name: "Flask Web App CI/CD Pipeline"
+
+# Trigger conditions for the workflow
+on:
+  # Trigger on push to main branch and pull requests
+  push:
+    branches:
+      - main
+      - develop
+      - copilot/create-flask-web-app-setup
+    tags:
+      - 'v*.*.*'
+  
+  # Trigger on pull requests to main branch
+  pull_request:
+    branches:
+      - main
+      - develop
+    types:
+      - opened
+      - synchronize
+      - reopened
+  
+  # Allow manual workflow dispatch
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+      skip_tests:
+        description: 'Skip test execution'
+        required: false
+        default: false
+        type: boolean
+
+# Global environment variables
+env:
+  PYTHON_VERSION: '3.11'
+  NODE_VERSION: '18'
+  DOCKER_IMAGE_NAME: 'dkrsrinivas/creative-flask-app'
+  COVERAGE_THRESHOLD: 85
+  SONAR_PROJECT_KEY: 'gh-srinivas_cicddemo-repo1-sv'
+  SONAR_ORGANIZATION: 'gh-srinivas'
+
+# Define reusable job configurations
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  # ================================================================================================
+  # JOB 1: Code Quality and Linting
+  # ================================================================================================
+  code-quality:
+    name: "🔍 Code Quality Analysis"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+      - name: "📥 Checkout Repository"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for better analysis
+      
+      - name: "🐍 Setup Python Environment"
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+          cache-dependency-path: 'requirements.txt'
+      
+      - name: "📦 Install Dependencies"
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install flake8 black isort pylint mypy bandit safety
+      
+      - name: "🎨 Code Formatting Check (Black)"
+        run: |
+          echo "::group::Black Formatting Check"
+          black --check --diff --color app/ tests/ run.py || (
+            echo "::error::Code formatting issues found. Run 'black app/ tests/ run.py' to fix."
+            exit 1
+          )
+          echo "::endgroup::"
+      
+      - name: "📐 Import Sorting Check (isort)"
+        run: |
+          echo "::group::Import Sorting Check"
+          isort --check-only --diff --color app/ tests/ run.py || (
+            echo "::error::Import sorting issues found. Run 'isort app/ tests/ run.py' to fix."
+            exit 1
+          )
+          echo "::endgroup::"
+      
+      - name: "🔧 Linting Analysis (flake8)"
+        run: |
+          echo "::group::Flake8 Linting"
+          flake8 app/ tests/ run.py \
+            --max-line-length=100 \
+            --exclude=.git,__pycache__,build,dist \
+            --extend-ignore=E203,W503,F401 \
+            --format='::error file=%(path)s,line=%(row)d,col=%(col)d::[flake8] %(code)s: %(text)s'
+          echo "::endgroup::"
+      
+      - name: "🔒 Security Analysis (Bandit)"
+        run: |
+          echo "::group::Security Analysis"
+          bandit -r app/ -f json -o bandit-report.json || true
+          bandit -r app/ --severity-level medium
+          echo "::endgroup::"
+      
+      - name: "🛡️ Dependency Vulnerability Check (Safety)"
+        run: |
+          echo "::group::Dependency Security Check"
+          safety check --json --output safety-report.json || true
+          safety check
+          echo "::endgroup::"
+      
+      - name: "📊 Upload Code Quality Artifacts"
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: code-quality-reports
+          path: |
+            bandit-report.json
+            safety-report.json
+          retention-days: 30
+
+  # ================================================================================================
+  # JOB 2: Comprehensive Testing Suite
+  # ================================================================================================
+  testing:
+    name: "🧪 Testing Suite"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: code-quality
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.9', '3.10', '3.11']
+    
+    steps:
+      - name: "📥 Checkout Repository"
+        uses: actions/checkout@v4
+      
+      - name: "🐍 Setup Python ${{ matrix.python-version }}"
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+      
+      - name: "📦 Install Dependencies"
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: "🧪 Run Unit Tests with Coverage"
+        if: ${{ !inputs.skip_tests }}
+        run: |
+          echo "::group::Unit Test Execution"
+          python -m pytest tests/ \
+            --verbose \
+            --tb=short \
+            --cov=app \
+            --cov-branch \
+            --cov-report=term-missing \
+            --cov-report=xml:coverage.xml \
+            --cov-report=html:coverage_html \
+            --junit-xml=pytest-results.xml \
+            --cov-fail-under=${{ env.COVERAGE_THRESHOLD }}
+          echo "::endgroup::"
+      
+      - name: "📊 Coverage Analysis"
+        if: ${{ !inputs.skip_tests }}
+        run: |
+          echo "::group::Coverage Analysis"
+          COVERAGE=$(python -c "import xml.etree.ElementTree as ET; print(int(float(ET.parse('coverage.xml').getroot().attrib['line-rate']) * 100))")
+          echo "COVERAGE_PERCENTAGE=${COVERAGE}" >> $GITHUB_ENV
+          echo "Test Coverage: ${COVERAGE}%"
+          
+          if [[ ${COVERAGE} -lt ${{ env.COVERAGE_THRESHOLD }} ]]; then
+            echo "COVERAGE_BELOW_THRESHOLD=true" >> $GITHUB_ENV
+            echo "::warning::Coverage ${COVERAGE}% is below threshold ${{ env.COVERAGE_THRESHOLD }}%"
+          else
+            echo "COVERAGE_BELOW_THRESHOLD=false" >> $GITHUB_ENV
+            echo "::notice::Coverage ${COVERAGE}% meets threshold ${{ env.COVERAGE_THRESHOLD }}%"
+          fi
+          echo "::endgroup::"
+      
+      - name: "📈 Upload Coverage Reports"
+        uses: actions/upload-artifact@v4
+        if: ${{ !inputs.skip_tests }}
+        with:
+          name: coverage-reports-py${{ matrix.python-version }}
+          path: |
+            coverage.xml
+            coverage_html/
+            pytest-results.xml
+          retention-days: 30
+      
+      - name: "📊 Publish Test Results"
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always() && !inputs.skip_tests
+        with:
+          files: pytest-results.xml
+          check_name: "Unit Test Results (Python ${{ matrix.python-version }})"
+
+  # ================================================================================================
+  # JOB 3: SonarCloud Quality Gate Analysis
+  # ================================================================================================
+  sonarcloud-analysis:
+    name: "☁️ SonarCloud Analysis"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: testing
+    if: github.actor != 'dependabot[bot]'
+    
+    steps:
+      - name: "📥 Checkout Repository"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full clone for better analysis
+      
+      - name: "📥 Download Coverage Reports"
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-reports-py3.11
+          path: .
+      
+      - name: "☁️ SonarCloud Scan"
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.projectKey=${{ env.SONAR_PROJECT_KEY }}
+            -Dsonar.organization=${{ env.SONAR_ORGANIZATION }}
+            -Dsonar.python.coverage.reportPaths=coverage.xml
+            -Dsonar.python.xunit.reportPath=pytest-results.xml
+            -Dsonar.sources=app/
+            -Dsonar.tests=tests/
+            -Dsonar.exclusions=**/__pycache__/**,**/venv/**,**/env/**
+            -Dsonar.coverage.exclusions=tests/**,**/conftest.py
+            -Dsonar.python.version=3.11
+
+  # ================================================================================================
+  # JOB 4: Email Notification for Low Coverage
+  # ================================================================================================
+  coverage-notification:
+    name: "📧 Coverage Notification"
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: testing
+    if: needs.testing.outputs.coverage_below_threshold == 'true'
+    
+    steps:
+      - name: "📧 Send Low Coverage Email Alert"
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "⚠️ Flask App: Test Coverage Below Threshold (${{ needs.testing.outputs.coverage_percentage }}%)"
+          to: vvsrinivasbabu@yahoo.com
+          from: "CI/CD Pipeline <${{ secrets.SMTP_USERNAME }}>"
+          html_body: |
+            <html>
+              <head>
+                <style>
+                  body { font-family: Arial, sans-serif; margin: 20px; }
+                  .header { background-color: #f44336; color: white; padding: 15px; border-radius: 5px; }
+                  .content { padding: 20px; border: 1px solid #ddd; border-radius: 5px; margin-top: 10px; }
+                  .metrics { background-color: #f9f9f9; padding: 10px; margin: 10px 0; }
+                  .footer { margin-top: 20px; font-size: 12px; color: #666; }
+                </style>
+              </head>
+              <body>
+                <div class="header">
+                  <h2>⚠️ Test Coverage Alert - Flask Web Application</h2>
+                </div>
+                <div class="content">
+                  <p>Hello,</p>
+                  <p>The test coverage for the Flask Web Application has fallen below the required threshold.</p>
+                  
+                  <div class="metrics">
+                    <strong>Coverage Metrics:</strong><br>
+                    • Current Coverage: <strong>${{ needs.testing.outputs.coverage_percentage }}%</strong><br>
+                    • Required Threshold: <strong>${{ env.COVERAGE_THRESHOLD }}%</strong><br>
+                    • Gap: <strong>${{ env.COVERAGE_THRESHOLD - needs.testing.outputs.coverage_percentage }}%</strong>
+                  </div>
+                  
+                  <p><strong>Repository:</strong> ${{ github.repository }}</p>
+                  <p><strong>Branch:</strong> ${{ github.ref_name }}</p>
+                  <p><strong>Commit:</strong> ${{ github.sha }}</p>
+                  <p><strong>Workflow Run:</strong> <a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">View Details</a></p>
+                  
+                  <p>Please review the test coverage and add additional unit tests to meet the required threshold.</p>
+                </div>
+                <div class="footer">
+                  <p>This is an automated notification from the CI/CD pipeline.</p>
+                  <p>Generated on: $(date -u)</p>
+                </div>
+              </body>
+            </html>
+
+  # ================================================================================================
+  # JOB 5: Docker Image Build and Security Scan
+  # ================================================================================================
+  docker-build:
+    name: "🐳 Docker Build & Security Scan"
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: [testing, sonarcloud-analysis]
+    outputs:
+      image-digest: ${{ steps.build.outputs.digest }}
+      image-tag: ${{ steps.meta.outputs.tags }}
+    
+    steps:
+      - name: "📥 Checkout Repository"
+        uses: actions/checkout@v4
+      
+      - name: "🐳 Set up Docker Buildx"
+        uses: docker/setup-buildx-action@v3
+      
+      - name: "🏷️ Generate Image Metadata"
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.DOCKER_IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=ref,event=tag
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=sha,prefix={{branch}}-
+          labels: |
+            org.opencontainers.image.title=Creative Flask Web App
+            org.opencontainers.image.description=A modern, responsive web application built with Flask and Bootstrap
+            org.opencontainers.image.vendor=CICD Demo
+      
+      - name: "🔐 Login to Docker Hub"
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+      
+      - name: "🔨 Build and Push Docker Image"
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            BUILD_DATE=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
+            VCS_REF=${{ github.sha }}
+            VERSION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      
+      - name: "🔍 Docker Image Security Scan"
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+      
+      - name: "📊 Upload Security Scan Results"
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'
+      
+      - name: "🧪 Test Docker Image"
+        run: |
+          echo "::group::Docker Image Testing"
+          # Pull the built image
+          docker pull ${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
+          
+          # Run container for testing
+          docker run -d --name test-container -p 5000:5000 \
+            ${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
+          
+          # Wait for container to start
+          sleep 10
+          
+          # Test health endpoint
+          curl -f http://localhost:5000/api/health || (
+            echo "::error::Health check failed"
+            docker logs test-container
+            exit 1
+          )
+          
+          # Test main page
+          curl -f http://localhost:5000/ || (
+            echo "::error::Main page test failed"
+            docker logs test-container
+            exit 1
+          )
+          
+          # Cleanup
+          docker stop test-container
+          docker rm test-container
+          echo "::endgroup::"
+
+  # ================================================================================================
+  # JOB 6: Deployment (if applicable)
+  # ================================================================================================
+  deployment:
+    name: "🚀 Deploy Application"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: docker-build
+    if: github.ref == 'refs/heads/main' || github.event.inputs.environment
+    environment: ${{ inputs.environment || 'staging' }}
+    
+    steps:
+      - name: "🚀 Deploy to ${{ inputs.environment || 'staging' }}"
+        run: |
+          echo "::group::Deployment Process"
+          echo "Deploying image: ${{ needs.docker-build.outputs.image-tag }}"
+          echo "Environment: ${{ inputs.environment || 'staging' }}"
+          echo "Image Digest: ${{ needs.docker-build.outputs.image-digest }}"
+          
+          # In a real scenario, this would deploy to your infrastructure
+          # Examples: kubectl apply, docker-compose up, AWS ECS update, etc.
+          
+          echo "::notice::Deployment simulated successfully!"
+          echo "::notice::Application URL: https://${{ inputs.environment || 'staging' }}.example.com"
+          echo "::endgroup::"
+      
+      - name: "📝 Deployment Summary"
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY << 'EOF'
+          ## 🚀 Deployment Summary
+          
+          **Environment:** ${{ inputs.environment || 'staging' }}
+          **Image:** ${{ needs.docker-build.outputs.image-tag }}
+          **Digest:** ${{ needs.docker-build.outputs.image-digest }}
+          **Status:** ✅ Successfully deployed
+          **URL:** https://${{ inputs.environment || 'staging' }}.example.com
+          
+          ### 📋 Post-Deployment Checklist
+          - [ ] Verify application health endpoints
+          - [ ] Run smoke tests
+          - [ ] Monitor application logs
+          - [ ] Check performance metrics
+          - [ ] Validate database connectivity
+          EOF
+
+  # ================================================================================================
+  # JOB 7: Notification and Cleanup
+  # ================================================================================================
+  notification:
+    name: "📢 Pipeline Notification"
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: always()
+    needs: [code-quality, testing, sonarcloud-analysis, docker-build, deployment]
+    
+    steps:
+      - name: "📊 Pipeline Summary"
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY << 'EOF'
+          ## 🏁 CI/CD Pipeline Summary
+          
+          ### 📋 Job Results
+          | Job | Status |
+          |-----|--------|
+          | Code Quality | ${{ needs.code-quality.result == 'success' && '✅ Passed' || '❌ Failed' }} |
+          | Testing | ${{ needs.testing.result == 'success' && '✅ Passed' || '❌ Failed' }} |
+          | SonarCloud | ${{ needs.sonarcloud-analysis.result == 'success' && '✅ Passed' || '❌ Failed' }} |
+          | Docker Build | ${{ needs.docker-build.result == 'success' && '✅ Passed' || '❌ Failed' }} |
+          | Deployment | ${{ needs.deployment.result == 'success' && '✅ Passed' || needs.deployment.result == 'skipped' && '⏭️ Skipped' || '❌ Failed' }} |
+          
+          ### 📈 Key Metrics
+          - **Coverage:** ${{ needs.testing.outputs.coverage_percentage || 'N/A' }}%
+          - **Python Version:** ${{ env.PYTHON_VERSION }}
+          - **Docker Image:** ${{ env.DOCKER_IMAGE_NAME }}
+          
+          EOF
+      
+      - name: "🎉 Success Notification"
+        if: needs.testing.result == 'success' && needs.docker-build.result == 'success'
+        run: |
+          echo "::notice::🎉 Pipeline completed successfully!"
+          echo "::notice::Docker image built and pushed: ${{ env.DOCKER_IMAGE_NAME }}"
+      
+      - name: "❌ Failure Notification"
+        if: needs.testing.result == 'failure' || needs.docker-build.result == 'failure'
+        run: |
+          echo "::error::❌ Pipeline failed. Please check the job outputs for details."
+          exit 1
