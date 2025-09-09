@@ -1,165 +1,476 @@
-# Spring PetClinic Sample Application [![Build Status](https://github.com/spring-projects/spring-petclinic/actions/workflows/maven-build.yml/badge.svg)](https://github.com/spring-projects/spring-petclinic/actions/workflows/maven-build.yml)[![Build Status](https://github.com/spring-projects/spring-petclinic/actions/workflows/gradle-build.yml/badge.svg)](https://github.com/spring-projects/spring-petclinic/actions/workflows/gradle-build.yml)
+# Creative Flask Web Application
 
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/spring-projects/spring-petclinic) [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=7517918)
+[![CI/CD Pipeline](https://github.com/gh-srinivas/cicddemo-repo1-sv/actions/workflows/ci-cd-pipeline.yml/badge.svg)](https://github.com/gh-srinivas/cicddemo-repo1-sv/actions/workflows/ci-cd-pipeline.yml)
+[![Coverage](https://img.shields.io/badge/coverage-85%25-brightgreen)](https://github.com/gh-srinivas/cicddemo-repo1-sv/actions)
+[![Docker Pulls](https://img.shields.io/docker/pulls/dkrsrinivas/creative-flask-app)](https://hub.docker.com/r/dkrsrinivas/creative-flask-app)
+[![Python Version](https://img.shields.io/badge/python-3.9%2B-blue)](https://python.org)
+[![Flask Version](https://img.shields.io/badge/flask-3.0.0-blue)](https://flask.palletsprojects.com/)
+[![License](https://img.shields.io/badge/license-Apache%202.0-green)](LICENSE.txt)
 
-## Understanding the Spring Petclinic application with a few diagrams
+A modern, creative, and eye-catching web application built with Flask and Bootstrap. This application demonstrates best practices in web development, including responsive design, RESTful APIs, comprehensive testing, and CI/CD automation.
 
-[See the presentation here](https://speakerdeck.com/michaelisvy/spring-petclinic-sample-application)
+## ✨ Features
 
-## Run Petclinic locally
+### 🎨 Modern UI/UX
+- **Responsive Design**: Mobile-first responsive layout using Bootstrap 5
+- **Interactive Elements**: Dynamic charts, animations, and smooth transitions
+- **Accessibility**: WCAG 2.1 compliant with keyboard navigation and screen reader support
+- **Dark Mode Support**: Automatic dark mode detection and manual toggle
 
-Spring Petclinic is a [Spring Boot](https://spring.io/guides/gs/spring-boot) application built using [Maven](https://spring.io/guides/gs/maven/) or [Gradle](https://spring.io/guides/gs/gradle/). You can build a jar file and run it from the command line (it should work just as well with Java 17 or newer):
+### 🚀 Core Functionality
+- **User Management**: Complete CRUD operations for user accounts
+- **Analytics Dashboard**: Real-time data visualization with Chart.js
+- **RESTful API**: Well-documented JSON APIs for all major operations
+- **Health Monitoring**: Built-in health checks and system status monitoring
 
-```bash
-git clone https://github.com/spring-projects/spring-petclinic.git
-cd spring-petclinic
-./mvnw package
-java -jar target/*.jar
-```
+### 🔒 Security & Performance
+- **Input Validation**: Comprehensive server-side and client-side validation
+- **XSS Protection**: HTML sanitization and Content Security Policy
+- **Error Handling**: Graceful error handling with custom error pages
+- **Caching**: Intelligent caching strategies for optimal performance
 
-(On Windows, or if your shell doesn't expand the glob, you might need to specify the JAR file name explicitly on the command line at the end there.)
+### 🛠️ Development Features
+- **Comprehensive Testing**: 85%+ test coverage with unit and integration tests
+- **Code Quality**: Automated linting, formatting, and security scanning
+- **Documentation**: Detailed docstrings and API documentation
+- **Docker Support**: Multi-stage Docker builds with security scanning
 
-You can then access the Petclinic at <http://localhost:8080/>.
+## 🚀 Quick Start
 
-<img width="1042" alt="petclinic-screenshot" src="https://cloud.githubusercontent.com/assets/838318/19727082/2aee6d6c-9b8e-11e6-81fe-e889a5ddfded.png">
-
-Or you can run it from Maven directly using the Spring Boot Maven plugin. If you do this, it will pick up changes that you make in the project immediately (changes to Java source files require a compile as well - most people use an IDE for this):
-
-```bash
-./mvnw spring-boot:run
-```
-
-> NOTE: If you prefer to use Gradle, you can build the app using `./gradlew build` and look for the jar file in `build/libs`.
-
-## Building a Container
-
-There is no `Dockerfile` in this project. You can build a container image (if you have a docker daemon) using the Spring Boot build plugin:
-
-```bash
-./mvnw spring-boot:build-image
-```
-
-## In case you find a bug/suggested improvement for Spring Petclinic
-
-Our issue tracker is available [here](https://github.com/spring-projects/spring-petclinic/issues).
-
-## Database configuration
-
-In its default configuration, Petclinic uses an in-memory database (H2) which
-gets populated at startup with data. The h2 console is exposed at `http://localhost:8080/h2-console`,
-and it is possible to inspect the content of the database using the `jdbc:h2:mem:<uuid>` URL. The UUID is printed at startup to the console.
-
-A similar setup is provided for MySQL and PostgreSQL if a persistent database configuration is needed. Note that whenever the database type changes, the app needs to run with a different profile: `spring.profiles.active=mysql` for MySQL or `spring.profiles.active=postgres` for PostgreSQL. See the [Spring Boot documentation](https://docs.spring.io/spring-boot/how-to/properties-and-configuration.html#howto.properties-and-configuration.set-active-spring-profiles) for more detail on how to set the active profile.
-
-You can start MySQL or PostgreSQL locally with whatever installer works for your OS or use docker:
+Get the application running in less than 5 minutes:
 
 ```bash
-docker run -e MYSQL_USER=petclinic -e MYSQL_PASSWORD=petclinic -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=petclinic -p 3306:3306 mysql:9.2
+# Clone the repository
+git clone https://github.com/gh-srinivas/cicddemo-repo1-sv.git
+cd cicddemo-repo1-sv
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the application
+python run.py
+
+# Open your browser and navigate to
+# http://localhost:5000
 ```
 
-or
-
-```bash
-docker run -e POSTGRES_USER=petclinic -e POSTGRES_PASSWORD=petclinic -e POSTGRES_DB=petclinic -p 5432:5432 postgres:17.5
-```
-
-Further documentation is provided for [MySQL](https://github.com/spring-projects/spring-petclinic/blob/main/src/main/resources/db/mysql/petclinic_db_setup_mysql.txt)
-and [PostgreSQL](https://github.com/spring-projects/spring-petclinic/blob/main/src/main/resources/db/postgres/petclinic_db_setup_postgres.txt).
-
-Instead of vanilla `docker` you can also use the provided `docker-compose.yml` file to start the database containers. Each one has a service named after the Spring profile:
-
-```bash
-docker compose up mysql
-```
-
-or
-
-```bash
-docker compose up postgres
-```
-
-## Test Applications
-
-At development time we recommend you use the test applications set up as `main()` methods in `PetClinicIntegrationTests` (using the default H2 database and also adding Spring Boot Devtools), `MySqlTestApplication` and `PostgresIntegrationTests`. These are set up so that you can run the apps in your IDE to get fast feedback and also run the same classes as integration tests against the respective database. The MySql integration tests use Testcontainers to start the database in a Docker container, and the Postgres tests use Docker Compose to do the same thing.
-
-## Compiling the CSS
-
-There is a `petclinic.css` in `src/main/resources/static/resources/css`. It was generated from the `petclinic.scss` source, combined with the [Bootstrap](https://getbootstrap.com/) library. If you make changes to the `scss`, or upgrade Bootstrap, you will need to re-compile the CSS resources using the Maven profile "css", i.e. `./mvnw package -P css`. There is no build profile for Gradle to compile the CSS.
-
-## Working with Petclinic in your IDE
+## 📦 Installation
 
 ### Prerequisites
 
-The following items should be installed in your system:
+- **Python 3.9+** (Python 3.11 recommended)
+- **pip** (Python package manager)
+- **Git** (for version control)
+- **Docker** (optional, for containerized deployment)
 
-- Java 17 or newer (full JDK, not a JRE)
-- [Git command line tool](https://help.github.com/articles/set-up-git)
-- Your preferred IDE
-  - Eclipse with the m2e plugin. Note: when m2e is available, there is an m2 icon in `Help -> About` dialog. If m2e is
-  not there, follow the install process [here](https://www.eclipse.org/m2e/)
-  - [Spring Tools Suite](https://spring.io/tools) (STS)
-  - [IntelliJ IDEA](https://www.jetbrains.com/idea/)
-  - [VS Code](https://code.visualstudio.com)
+### Step-by-Step Installation
 
-### Steps
+1. **Clone the Repository**
+   ```bash
+   git clone https://github.com/gh-srinivas/cicddemo-repo1-sv.git
+   cd cicddemo-repo1-sv
+   ```
 
-1. On the command line run:
+2. **Create Virtual Environment** (Recommended)
+   ```bash
+   python -m venv venv
+   
+   # On Windows
+   venv\Scripts\activate
+   
+   # On macOS/Linux
+   source venv/bin/activate
+   ```
 
-    ```bash
-    git clone https://github.com/spring-projects/spring-petclinic.git
-    ```
+3. **Install Dependencies**
+   ```bash
+   pip install --upgrade pip
+   pip install -r requirements.txt
+   ```
 
-1. Inside Eclipse or STS:
+4. **Run the Application**
+   ```bash
+   # Using the run script (recommended)
+   python run.py
+   
+   # Or using Flask directly
+   python -m flask run
+   
+   # Or using Gunicorn (production)
+   gunicorn --bind 0.0.0.0:5000 app:app
+   ```
 
-    Open the project via `File -> Import -> Maven -> Existing Maven project`, then select the root directory of the cloned repo.
+5. **Access the Application**
+   - Open your web browser
+   - Navigate to `http://localhost:5000`
+   - Enjoy exploring the features!
 
-    Then either build on the command line `./mvnw generate-resources` or use the Eclipse launcher (right-click on project and `Run As -> Maven install`) to generate the CSS. Run the application's main method by right-clicking on it and choosing `Run As -> Java Application`.
+## ⚙️ Configuration
 
-1. Inside IntelliJ IDEA:
+The application supports multiple configuration environments:
 
-    In the main menu, choose `File -> Open` and select the Petclinic [pom.xml](pom.xml). Click on the `Open` button.
+### Environment Modes
 
-    - CSS files are generated from the Maven build. You can build them on the command line `./mvnw generate-resources` or right-click on the `spring-petclinic` project then `Maven -> Generates sources and Update Folders`.
+| Environment | Description | Use Case |
+|-------------|-------------|----------|
+| `development` | Debug enabled, detailed logging | Local development |
+| `testing` | Test-specific settings | Automated testing |
+| `production` | Optimized for production | Live deployment |
 
-    - A run configuration named `PetClinicApplication` should have been created for you if you're using a recent Ultimate version. Otherwise, run the application by right-clicking on the `PetClinicApplication` main class and choosing `Run 'PetClinicApplication'`.
+### Command Line Options
 
-1. Navigate to the Petclinic
+```bash
+python run.py --help
 
-    Visit [http://localhost:8080](http://localhost:8080) in your browser.
+Usage: run.py [-h] [--environment {development,production,testing}] 
+              [--production] [--testing] [--host HOST] [--port PORT] 
+              [--debug] [--log-level {DEBUG,INFO,WARNING,ERROR,CRITICAL}] 
+              [--version]
 
-## Looking for something in particular?
+Examples:
+  python run.py                     # Development mode
+  python run.py --production        # Production mode
+  python run.py --host 127.0.0.1    # Bind to specific host
+  python run.py --port 8080         # Use different port
+  python run.py --debug             # Enable debug mode
+```
 
-|Spring Boot Configuration | Class or Java property files  |
-|--------------------------|---|
-|The Main Class | [PetClinicApplication](https://github.com/spring-projects/spring-petclinic/blob/main/src/main/java/org/springframework/samples/petclinic/PetClinicApplication.java) |
-|Properties Files | [application.properties](https://github.com/spring-projects/spring-petclinic/blob/main/src/main/resources) |
-|Caching | [CacheConfiguration](https://github.com/spring-projects/spring-petclinic/blob/main/src/main/java/org/springframework/samples/petclinic/system/CacheConfiguration.java) |
+## 📚 API Documentation
 
-## Interesting Spring Petclinic branches and forks
+The application provides a comprehensive RESTful API:
 
-The Spring Petclinic "main" branch in the [spring-projects](https://github.com/spring-projects/spring-petclinic)
-GitHub org is the "canonical" implementation based on Spring Boot and Thymeleaf. There are
-[quite a few forks](https://spring-petclinic.github.io/docs/forks.html) in the GitHub org
-[spring-petclinic](https://github.com/spring-petclinic). If you are interested in using a different technology stack to implement the Pet Clinic, please join the community there.
+### Base URL
+```
+http://localhost:5000/api
+```
 
-## Interaction with other open-source projects
+### Endpoints
 
-One of the best parts about working on the Spring Petclinic application is that we have the opportunity to work in direct contact with many Open Source projects. We found bugs/suggested improvements on various topics such as Spring, Spring Data, Bean Validation and even Eclipse! In many cases, they've been fixed/implemented in just a few days.
-Here is a list of them:
+#### Health Check
+```http
+GET /api/health
+```
 
-| Name | Issue |
-|------|-------|
-| Spring JDBC: simplify usage of NamedParameterJdbcTemplate | [SPR-10256](https://github.com/spring-projects/spring-framework/issues/14889) and [SPR-10257](https://github.com/spring-projects/spring-framework/issues/14890) |
-| Bean Validation / Hibernate Validator: simplify Maven dependencies and backward compatibility |[HV-790](https://hibernate.atlassian.net/browse/HV-790) and [HV-792](https://hibernate.atlassian.net/browse/HV-792) |
-| Spring Data: provide more flexibility when working with JPQL queries | [DATAJPA-292](https://github.com/spring-projects/spring-data-jpa/issues/704) |
+**Response:**
+```json
+{
+  "status": "healthy",
+  "timestamp": "2024-01-15T14:30:00Z",
+  "version": "1.0.0",
+  "environment": "production",
+  "uptime": "30 days, 0:00:00",
+  "database_connected": true,
+  "analytics_service": true
+}
+```
 
-## Contributing
+#### User Management
 
-The [issue tracker](https://github.com/spring-projects/spring-petclinic/issues) is the preferred channel for bug reports, feature requests and submitting pull requests.
+##### Get All Users
+```http
+GET /api/users
+```
 
-For pull requests, editor preferences are available in the [editor config](.editorconfig) for easy use in common text editors. Read more and download plugins at <https://editorconfig.org>. All commits must include a __Signed-off-by__ trailer at the end of each commit message to indicate that the contributor agrees to the Developer Certificate of Origin.
-For additional details, please refer to the blog post [Hello DCO, Goodbye CLA: Simplifying Contributions to Spring](https://spring.io/blog/2025/01/06/hello-dco-goodbye-cla-simplifying-contributions-to-spring).
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "uuid-string",
+      "name": "John Doe",
+      "email": "john.doe@example.com",
+      "company": "TechCorp Inc.",
+      "role": "admin",
+      "status": "active",
+      "created_at": "2024-01-15T14:30:00Z"
+    }
+  ],
+  "count": 1
+}
+```
 
-## License
+##### Create New User
+```http
+POST /api/users
+Content-Type: application/json
 
-The Spring PetClinic sample application is released under version 2.0 of the [Apache License](https://www.apache.org/licenses/LICENSE-2.0).
+{
+  "name": "Jane Smith",
+  "email": "jane.smith@example.com",
+  "company": "DataSoft LLC",
+  "role": "analyst"
+}
+```
+
+#### Analytics
+
+##### Get Analytics Summary
+```http
+GET /api/analytics/summary
+```
+
+## 🧪 Testing
+
+The application includes comprehensive testing with high code coverage.
+
+### Running Tests
+
+```bash
+# Run all tests
+python -m pytest
+
+# Run with coverage report
+python -m pytest --cov=app --cov-report=term-missing
+
+# Run specific test file
+python -m pytest tests/test_routes.py
+
+# Generate HTML coverage report
+python -m pytest --cov=app --cov-report=html
+```
+
+### Coverage Requirements
+
+- **Minimum Coverage**: 85%
+- **Branch Coverage**: Enabled
+- **Missing Lines**: Reported in detail
+- **Coverage Enforcement**: Automated in CI/CD
+
+## 🐳 Docker Deployment
+
+The application supports Docker deployment with multi-stage builds and security scanning.
+
+### Quick Docker Start
+
+```bash
+# Pull the latest image
+docker pull dkrsrinivas/creative-flask-app:latest
+
+# Run the container
+docker run -d -p 5000:5000 --name flask-app dkrsrinivas/creative-flask-app:latest
+
+# Access the application
+open http://localhost:5000
+```
+
+### Building from Source
+
+```bash
+# Build the Docker image
+docker build -t creative-flask-app .
+
+# Run with custom configuration
+docker run -d \
+  -p 5000:5000 \
+  -e FLASK_ENV=production \
+  -e SECRET_KEY=your-production-secret \
+  --name flask-app \
+  creative-flask-app
+```
+
+## 🔄 CI/CD Pipeline
+
+The application includes a comprehensive CI/CD pipeline with GitHub Actions.
+
+### Pipeline Stages
+
+1. **Code Quality Analysis**
+   - Code formatting (Black)
+   - Import sorting (isort)
+   - Linting (flake8)
+   - Security analysis (Bandit)
+   - Dependency scanning (Safety)
+
+2. **Comprehensive Testing**
+   - Unit tests with pytest
+   - Coverage analysis (85% minimum)
+   - Multi-Python version testing (3.9, 3.10, 3.11)
+
+3. **SonarCloud Integration**
+   - Quality gate analysis
+   - Code coverage tracking
+   - Security vulnerability detection
+   - Technical debt monitoring
+
+4. **Docker Build & Push**
+   - Multi-platform builds
+   - Security scanning with Trivy
+   - Automated tagging
+   - Docker Hub publishing (dkrsrinivas/creative-flask-app)
+
+5. **Email Notifications**
+   - Automatic alerts to vvsrinivasbabu@yahoo.com if coverage < 85%
+   - SMTP integration for pipeline notifications
+
+### Environment Variables Required
+
+Set these secrets in your GitHub repository:
+
+```bash
+SONAR_TOKEN                  # SonarCloud authentication
+DOCKER_HUB_USERNAME         # Docker Hub username: dkrsrinivas
+DOCKER_HUB_TOKEN           # Docker Hub access token: dckr_pat_oYM-x4-win43brA4iJBLAhj0jk4
+SMTP_USERNAME              # SMTP username for notifications
+SMTP_PASSWORD              # SMTP password for notifications
+```
+
+## 💻 Development Guide
+
+### Development Setup
+
+```bash
+# Clone and setup
+git clone https://github.com/gh-srinivas/cicddemo-repo1-sv.git
+cd cicddemo-repo1-sv
+
+# Setup development environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install -r requirements.txt
+
+# Install development tools
+pip install black isort flake8 pytest-cov mypy pre-commit
+
+# Setup pre-commit hooks
+pre-commit install
+```
+
+### Project Structure
+
+```
+cicddemo-repo1-sv/
+├── app/                     # Application source code
+│   ├── __init__.py         # Application factory
+│   ├── config.py           # Configuration classes
+│   ├── routes.py           # Route definitions
+│   ├── models.py           # Business logic models
+│   ├── utils.py            # Utility functions
+│   ├── static/             # Static files (CSS, JS, images)
+│   │   ├── css/           # Custom stylesheets
+│   │   ├── js/            # JavaScript files
+│   │   └── images/        # Image assets
+│   └── templates/          # Jinja2 templates
+│       ├── base.html      # Base template
+│       ├── index.html     # Homepage
+│       ├── users.html     # User management
+│       ├── analytics.html # Analytics dashboard
+│       └── errors/        # Error pages
+├── tests/                  # Test suite
+│   ├── conftest.py         # Test configuration
+│   ├── test_routes.py      # Route tests
+│   └── test_models.py      # Model tests
+├── .github/                # GitHub configuration
+│   └── workflows/          # CI/CD workflows
+├── Dockerfile              # Docker configuration
+├── requirements.txt        # Python dependencies
+├── run.py                  # Application entry point
+└── README.md              # This file
+```
+
+## 🔧 Troubleshooting
+
+### Common Issues
+
+1. **Port Already in Use**
+   ```bash
+   # Find process using port 5000
+   lsof -i :5000
+   
+   # Kill the process or use different port
+   python run.py --port 8080
+   ```
+
+2. **Module Import Errors**
+   ```bash
+   # Ensure you're in the correct directory
+   cd cicddemo-repo1-sv
+   
+   # Activate virtual environment
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   
+   # Reinstall dependencies
+   pip install -r requirements.txt
+   ```
+
+3. **Docker Build Issues**
+   ```bash
+   # Clear Docker cache
+   docker builder prune
+   
+   # Rebuild without cache
+   docker build --no-cache -t creative-flask-app .
+   ```
+
+### Debug Mode
+
+Enable debug mode for detailed error information:
+
+```bash
+# Method 1: Command line
+python run.py --debug
+
+# Method 2: Environment variable
+export FLASK_DEBUG=True
+python run.py
+```
+
+## 🤝 Contributing
+
+We welcome contributions from the community! Please follow these guidelines:
+
+### Contribution Process
+
+1. **Fork the Repository**
+2. **Create Feature Branch**: `git checkout -b feature/amazing-feature`
+3. **Make Changes**: Follow code style and add tests
+4. **Test Changes**: Ensure all tests pass with good coverage
+5. **Commit Changes**: Use conventional commit messages
+6. **Push to Branch**: `git push origin feature/amazing-feature`
+7. **Create Pull Request**: Provide detailed description
+
+### Commit Message Convention
+
+```bash
+feat: add new user registration feature
+fix: resolve email validation bug
+docs: update API documentation
+test: add tests for user management
+chore: update dependencies
+```
+
+## 📊 Application Architecture
+
+### Technology Stack
+
+- **Backend**: Python 3.11 + Flask 3.0.0
+- **Frontend**: Bootstrap 5.3.2 + Chart.js + Font Awesome
+- **Testing**: pytest + pytest-cov + pytest-flask
+- **Containerization**: Docker multi-stage builds
+- **CI/CD**: GitHub Actions + SonarCloud + Docker Hub
+- **Code Quality**: Black, isort, flake8, Bandit, Safety
+
+### Key Components
+
+- **User Management System**: Complete CRUD operations with validation
+- **Analytics Dashboard**: Real-time metrics and data visualization  
+- **RESTful API**: JSON-based endpoints for all operations
+- **Health Monitoring**: Application and system health checks
+- **Security**: Input sanitization, XSS protection, CSRF protection
+
+## 📞 Support & Contact
+
+- **Issues**: [GitHub Issues](https://github.com/gh-srinivas/cicddemo-repo1-sv/issues)
+- **Email**: vvsrinivasbabu@yahoo.com
+- **Docker Hub**: [dkrsrinivas/creative-flask-app](https://hub.docker.com/r/dkrsrinivas/creative-flask-app)
+
+## 📄 License
+
+This project is licensed under the Apache License 2.0 - see the [LICENSE.txt](LICENSE.txt) file for details.
+
+---
+
+<div align="center">
+  <p>Made with ❤️ for the developer community</p>
+  <p><strong>A comprehensive Flask web application with modern CI/CD pipeline</strong></p>
+</div>

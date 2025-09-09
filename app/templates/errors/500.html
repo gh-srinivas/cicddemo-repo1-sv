@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Server Error - Creative Flask Web App{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center text-center">
+            <div class="col-lg-6">
+                <div class="error-content">
+                    <i class="fas fa-exclamation-triangle display-1 text-warning mb-4"></i>
+                    <h1 class="display-4 fw-bold mb-3">500</h1>
+                    <h2 class="h3 mb-3">Internal Server Error</h2>
+                    <p class="lead text-muted mb-4">
+                        Something went wrong on our end. We're working to fix the issue. Please try again later.
+                    </p>
+                    <div class="d-flex gap-3 justify-content-center flex-wrap">
+                        <a href="{{ url_for('main.home') }}" class="btn btn-primary">
+                            <i class="fas fa-home me-2"></i>Go Home
+                        </a>
+                        <button class="btn btn-outline-secondary" onclick="window.location.reload()">
+                            <i class="fas fa-refresh me-2"></i>Try Again
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
